@@ -1,5 +1,9 @@
 ## React DEMO implementing [XState](https://xstate.js.org) Statecharts for managing state
 
+### Run locally
+
+- > npm run dev
+
 #### xstate Packages included
 
 - npm i --save xstate
