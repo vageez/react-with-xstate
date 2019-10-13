@@ -20,14 +20,8 @@ const Pre = styled.pre`
 const fetchUser = username =>
   axios
     .get(`https://api.github.com/users/${username}`)
-    .then(({ data }) => {
-      send('SUCCESS')
-      return data
-    })
-    .catch(error => {
-      send('REJECT')
-      return error
-    })
+    .then(({ data }) => send({ payload: data }))
+    .catch(error => send(error))
 
 const FetchState = taggedSum('FetchState', {
   IDLE: [],
@@ -98,35 +92,37 @@ const fetchMachine = Machine(
         }
       }
     }
-  },
-  {
-    actions: {
-      setLoading: assign((_context, _event) => ({
-        fetchState: FetchState.LOADING
-      })),
-      setSuccess: assign((_context, _event) => ({
-        fetchState: FetchState.SUCCESS
-      })),
-      setFailure: assign((_context, _event) => ({
-        fetchState: FetchState.FAILIURE
-      })),
-      setIdle: assign((_context, _event) => ({
-        fetchState: FetchState.IDLE,
-        user: Maybe.Nothing,
-        error: Maybe.Nothing
-      })),
-      setUser: assign({
-        user: (_context, event) => Maybe.Just(event.data)
-      }),
-      setError: assign({
-        error: (_context, event) => Maybe.Just(event.data)
-      })
-    }
   }
+  // Can also take actions as second argument
 )
 
+const enhancedFetchMachine = fetchMachine.withConfig({
+  actions: {
+    setLoading: assign((_context, _event) => ({
+      fetchState: FetchState.LOADING
+    })),
+    setSuccess: assign((_context, _event) => ({
+      fetchState: FetchState.SUCCESS
+    })),
+    setFailure: assign((_context, _event) => ({
+      fetchState: FetchState.FAILIURE
+    })),
+    setIdle: assign((_context, _event) => ({
+      fetchState: FetchState.IDLE,
+      user: Maybe.Nothing,
+      error: Maybe.Nothing
+    })),
+    setUser: assign({
+      user: (_context, res) => Maybe.Just(res.data.event.payload)
+    }),
+    setError: assign({
+      error: (_context, err) => Maybe.Just(err)
+    })
+  }
+})
+
 export default () => {
-  const [current, send] = useMachine(fetchMachine)
+  const [current, send] = useMachine(enhancedFetchMachine)
   const {
     context: { fetchState, user, error }
   } = current
