@@ -54,15 +54,6 @@ const fetchMachine = Machine(
         }
       },
       loading: {
-        on: {
-          RESOLVE: {
-            target: 'success'
-          },
-          REJECT: {
-            target: 'failure',
-            actions: 'setFailure'
-          }
-        },
         invoke: {
           id: 'getUser',
           src: (_context, _event) => fetchUser('vageez'),
